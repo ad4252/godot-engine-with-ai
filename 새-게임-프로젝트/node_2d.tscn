@@ -1,0 +1,93 @@
+[gd_scene format=3 uid="uid://dt313wg2imqoo"]
+
+[ext_resource type="Script" uid="uid://cmohbs8u7qrwo" path="res://node_2d.gd" id="1_0e48y"]
+[ext_resource type="PackedScene" uid="uid://dqq53fpxvy0go" path="res://card_ui.tscn" id="1_wtcfe"]
+
+[node name="Node2D" type="Node2D" unique_id=116091607]
+script = ExtResource("1_0e48y")
+
+[node name="card_ui" parent="." unique_id=1968523526 instance=ExtResource("1_wtcfe")]
+unique_name_in_owner = true
+offset_left = 1.0
+offset_right = 1.0
+metadata/_edit_use_anchors_ = true
+
+[node name="UI_Layout" type="Control" parent="." unique_id=1037344517]
+custom_minimum_size = Vector2(1152, 800)
+layout_mode = 3
+anchors_preset = 0
+offset_left = 4.0
+offset_top = -3.0
+offset_right = 1156.0
+offset_bottom = 797.0
+metadata/_edit_use_anchors_ = true
+
+[node name="PlayerHPLabel" type="Label" parent="UI_Layout" unique_id=1978399777]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.0069444445
+anchor_right = 0.0069444445
+anchor_bottom = 0.005
+offset_left = 192.0
+offset_top = 50.0
+offset_right = 442.0
+offset_bottom = 96.0
+offset_transform_enabled = true
+offset_transform_position = Vector2(50, 50)
+metadata/_edit_use_anchors_ = true
+
+[node name="EnemyHPLabel" type="Label" parent="UI_Layout" unique_id=2133238054]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 50)
+layout_mode = 1
+anchors_preset = -1
+offset_left = 742.0
+offset_top = 51.0
+offset_right = 1073.0
+offset_bottom = 143.0
+offset_transform_enabled = true
+offset_transform_position = Vector2(50, 50)
+metadata/_edit_use_anchors_ = true
+
+[node name="ResultLabel" type="Label" parent="UI_Layout" unique_id=1440455699]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.0125
+anchor_bottom = 0.0125
+offset_left = 629.0
+offset_top = 378.0
+offset_right = 987.0
+offset_bottom = 529.0
+metadata/_edit_use_anchors_ = true
+
+[node name="BattleButton" type="Button" parent="UI_Layout" unique_id=1129880115]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.0125
+anchor_bottom = 0.0125
+offset_left = 1007.0
+offset_top = 397.0
+offset_right = 1072.0
+offset_bottom = 428.0
+mouse_filter = 1
+text = "합 진행!"
+metadata/_edit_use_anchors_ = true
+
+[node name="ResetButton" type="Button" parent="UI_Layout" unique_id=1066219592]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = -0.00086805556
+anchor_top = 0.0275
+anchor_right = -0.00086805556
+anchor_bottom = 0.0275
+offset_left = 1009.0
+offset_top = 438.0
+offset_right = 1065.0
+offset_bottom = 478.0
+mouse_filter = 1
+text = "초기화"
+metadata/_edit_use_anchors_ = true
