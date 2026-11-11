@@ -1,17 +1,10 @@
 [gd_scene format=3 uid="uid://dt313wg2imqoo"]
 
 [ext_resource type="Script" uid="uid://cmohbs8u7qrwo" path="res://node_2d.gd" id="1_0e48y"]
-[ext_resource type="PackedScene" uid="uid://dqq53fpxvy0go" path="res://card_ui.tscn" id="1_wtcfe"]
 [ext_resource type="PackedScene" uid="uid://dx58jv4gce3tq" path="res://BattleStage.tscn" id="3_epypp"]
 
 [node name="Node2D" type="Node2D" unique_id=116091607]
 script = ExtResource("1_0e48y")
-
-[node name="card_ui" parent="." unique_id=1968523526 instance=ExtResource("1_wtcfe")]
-unique_name_in_owner = true
-offset_left = 1.0
-offset_right = 1.0
-metadata/_edit_use_anchors_ = true
 
 [node name="UI_Layout" type="Control" parent="." unique_id=1037344517]
 custom_minimum_size = Vector2(1152, 800)
@@ -78,10 +71,87 @@ mouse_filter = 1
 text = "초기화"
 metadata/_edit_use_anchors_ = true
 
+[node name="AttributeDisplay" type="Label" parent="UI_Layout" unique_id=1270805583]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 912.0
+offset_top = 122.0
+offset_right = 1126.0
+offset_bottom = 237.0
+metadata/_edit_use_anchors_ = true
+
+[node name="BuffDisplay" type="Label" parent="UI_Layout" unique_id=1088251436]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 888.0
+offset_top = 8.0
+offset_right = 1145.0
+offset_bottom = 91.0
+metadata/_edit_use_anchors_ = true
+
+[node name="BattleLog" type="RichTextLabel" parent="UI_Layout" unique_id=830665442]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.53125
+anchor_right = 0.37586805
+anchor_bottom = 0.8075
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/default_color = Color(1, 1, 1, 1)
+bbcode_enabled = true
+scroll_following = true
+metadata/_edit_use_anchors_ = true
+
 [node name="BattleStage" parent="." unique_id=1463015289 instance=ExtResource("3_epypp")]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(600, 300)
 offset_left = 271.0
 offset_top = 107.0
 offset_right = 871.0
 offset_bottom = 407.0
+metadata/_edit_use_anchors_ = true
+
+[node name="AttributeSelect" type="OptionButton" parent="." unique_id=225071719]
+unique_name_in_owner = true
+offset_left = 1048.0
+offset_top = 542.0
+offset_right = 1088.0
+offset_bottom = 562.0
+metadata/_edit_use_anchors_ = true
+
+[node name="BuffSelect" type="OptionButton" parent="." unique_id=964330792]
+unique_name_in_owner = true
+offset_left = 897.0
+offset_top = 545.0
+offset_right = 937.0
+offset_bottom = 565.0
+metadata/_edit_use_anchors_ = true
+
+[node name="P1Min" type="SpinBox" parent="." unique_id=368037235]
+offset_left = 444.0
+offset_top = 543.0
+offset_right = 530.5
+offset_bottom = 574.0
+metadata/_edit_use_anchors_ = true
+
+[node name="P1Max" type="SpinBox" parent="." unique_id=1102690282]
+offset_left = 567.0
+offset_top = 543.0
+offset_right = 653.5
+offset_bottom = 574.0
+metadata/_edit_use_anchors_ = true
+
+[node name="P2Min" type="SpinBox" parent="." unique_id=600812988]
+offset_left = 679.0
+offset_top = 540.0
+offset_right = 765.5
+offset_bottom = 571.0
+metadata/_edit_use_anchors_ = true
+
+[node name="P2Max" type="SpinBox" parent="." unique_id=759227112]
+offset_left = 786.0
+offset_top = 538.0
+offset_right = 872.5
+offset_bottom = 569.0
 metadata/_edit_use_anchors_ = true

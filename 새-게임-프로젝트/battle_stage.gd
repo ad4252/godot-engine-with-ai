@@ -1,7 +1,7 @@
 class_name BattleStage
 extends Control
 
-# 슬롯머신 연출에서 돌아가는 숫자 범위 (주사위 2개 합 = 2~14)
+# 슬롯머신 연출 기본값 (범위 미지정 시 기본 2~14)
 @export var roll_min := 2
 @export var roll_max := 14
 
@@ -40,11 +40,10 @@ func _ready() -> void:
 
 # ───────── 안전 장치 ─────────
 
-# SpriteFrames가 없거나 idle 애니메이션이 없으면 true
 func _needs_placeholder(sprite: AnimatedSprite2D) -> bool:
 	return sprite.sprite_frames == null or not sprite.sprite_frames.has_animation("idle")
 
-# 없는 애니메이션이면 아무것도 안 하고 넘어감 (에러 방지)
+
 func _play(sprite: AnimatedSprite2D, anim: String) -> void:
 	if sprite.sprite_frames and sprite.sprite_frames.has_animation(anim):
 		sprite.play(anim)
@@ -62,18 +61,17 @@ func _layout() -> void:
 
 
 # ─────────────────────────────────────────────
-# 메인 함수: 값 2개를 받아 전투 연출 재생
+# 메인 함수: 플레이어/적의 (최종값, 최소범위, 최대범위)를 받아서 전투 연출
 # 반환값: 1 = 플레이어 승, -1 = 적 승, 0 = 무승부
-# 사용법: await battle_stage.play_clash(p_total, e_total)
 # ─────────────────────────────────────────────
-func play_clash(p_val: int, e_val: int) -> int:
+func play_clash(p_val: int, e_val: int, p_min: int = 2, p_max: int = 14, e_min: int = 2, e_max: int = 14) -> int:
 	busy = true
 	var result := signi(p_val - e_val)
 	var diff := absi(p_val - e_val)
 	var center := size / 2.0 + Vector2(0, size.y * 0.1)
 
-	# 1) 숫자 슬롯머신 연출
-	await _dice_roll_effect(p_val, e_val)
+	# 1) 주사위 슬롯머신 연출 (전달받은 범위 반영)
+	await _dice_roll_effect(p_val, e_val, p_min, p_max, e_min, e_max)
 
 	# 2) 중앙으로 돌진
 	_play(player, "attack")
@@ -117,24 +115,32 @@ func play_clash(p_val: int, e_val: int) -> int:
 
 # ───────── 연출 부품들 ─────────
 
-func _dice_roll_effect(p_val: int, e_val: int) -> void:
+func _dice_roll_effect(p_val: int, e_val: int, p_min: int, p_max: int, e_min: int, e_max: int) -> void:
 	var elapsed := 0.0
+	var interval := 0.04
+	
+	# 주사위가 굴러가는 동안 무작위 값 틱틱 변경
 	while elapsed < 0.7:
-		player_roll.text = str(randi_range(roll_min, roll_max))
-		enemy_roll.text = str(randi_range(roll_min, roll_max))
-		await get_tree().create_timer(0.05).timeout
-		elapsed += 0.05
+		player_roll.text = str(randi_range(p_min, p_max))
+		enemy_roll.text = str(randi_range(e_min, e_max))
+		await get_tree().create_timer(interval).timeout
+		elapsed += interval
+		
+	# 최종 수치 확정
 	player_roll.text = str(p_val)
 	enemy_roll.text = str(e_val)
+	
+	# 팝(Pop) 스케일 강조 연출
 	for lb in [player_roll, enemy_roll]:
-		lb.scale = Vector2(1.8, 1.8)
-		create_tween().tween_property(lb, "scale", Vector2.ONE, 0.2) \
+		lb.pivot_offset = lb.size / 2
+		lb.scale = Vector2(2.2, 2.2)
+		create_tween().tween_property(lb, "scale", Vector2.ONE, 0.25) \
 			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+			
 	await get_tree().create_timer(0.4).timeout
 
 
 func _hit_effect(target: AnimatedSprite2D, dir: int, dmg: int) -> void:
-	# dir: 1이면 오른쪽(적)이 맞음, -1이면 왼쪽(플레이어)이 맞음
 	_play(target, "hurt")
 	target.modulate = Color(1, 0.4, 0.4)
 	var knock := create_tween().set_parallel(true)
@@ -178,7 +184,6 @@ func _shake(strength: float, duration: float) -> void:
 
 func _hit_stop(duration: float) -> void:
 	Engine.time_scale = 0.05
-	# 4번째 true = 느려진 시간(time_scale)을 무시하고 실제 시간으로 기다림
 	await get_tree().create_timer(duration, true, false, true).timeout
 	Engine.time_scale = 1.0
 
@@ -198,7 +203,6 @@ func _popup(text: String, pos: Vector2, color: Color) -> void:
 	t.chain().tween_callback(lb.queue_free)
 
 
-# 임시 캐릭터 (도트 그림 완성 전용)
 func _make_placeholder(color: Color) -> SpriteFrames:
 	var img := Image.create(32, 48, false, Image.FORMAT_RGBA8)
 	img.fill(color)
