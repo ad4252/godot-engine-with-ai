@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://dx58jv4gce3tq" path="res://BattleStage.tscn" id="3_epypp"]
 
 [node name="Node2D" type="Node2D" unique_id=116091607]
+position = Vector2(-6, 4)
 script = ExtResource("1_0e48y")
 
 [node name="UI_Layout" type="Control" parent="." unique_id=1037344517]
@@ -20,10 +21,10 @@ metadata/_edit_use_anchors_ = true
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = -1
-offset_left = 57.0
-offset_top = 49.0
-offset_right = 365.0
-offset_bottom = 135.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 328.0
+offset_bottom = 106.0
 offset_transform_enabled = true
 offset_transform_position = Vector2(50, 50)
 metadata/_edit_use_anchors_ = true
@@ -33,10 +34,10 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(200, 50)
 layout_mode = 1
 anchors_preset = -1
-offset_left = 742.0
-offset_top = 51.0
-offset_right = 1073.0
-offset_bottom = 143.0
+offset_left = 803.0
+offset_top = 20.0
+offset_right = 1134.0
+offset_bottom = 112.0
 offset_transform_enabled = true
 offset_transform_position = Vector2(50, 50)
 metadata/_edit_use_anchors_ = true
@@ -45,12 +46,10 @@ metadata/_edit_use_anchors_ = true
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = -1
-anchor_top = 0.0125
-anchor_bottom = 0.0125
-offset_left = 1007.0
-offset_top = 397.0
-offset_right = 1072.0
-offset_bottom = 428.0
+offset_left = 937.0
+offset_top = 391.0
+offset_right = 1002.0
+offset_bottom = 422.0
 mouse_filter = 1
 text = "합 진행!"
 metadata/_edit_use_anchors_ = true
@@ -59,34 +58,35 @@ metadata/_edit_use_anchors_ = true
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = -1
-anchor_left = -0.00086805556
-anchor_top = 0.0275
-anchor_right = -0.00086805556
-anchor_bottom = 0.0275
-offset_left = 1009.0
-offset_top = 438.0
-offset_right = 1065.0
-offset_bottom = 478.0
+anchor_left = -0.013888889
+anchor_top = -0.0075
+anchor_bottom = -0.0075
+offset_left = 1041.0
+offset_top = 390.0
+offset_right = 1097.0
+offset_bottom = 430.0
 mouse_filter = 1
 text = "초기화"
 metadata/_edit_use_anchors_ = true
 
 [node name="AttributeDisplay" type="Label" parent="UI_Layout" unique_id=1270805583]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 912.0
-offset_top = 122.0
-offset_right = 1126.0
-offset_bottom = 237.0
+layout_mode = 1
+anchors_preset = -1
+offset_left = 910.0
+offset_top = 155.0
+offset_right = 1124.0
+offset_bottom = 270.0
 metadata/_edit_use_anchors_ = true
 
 [node name="BuffDisplay" type="Label" parent="UI_Layout" unique_id=1088251436]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 888.0
-offset_top = 8.0
-offset_right = 1145.0
-offset_bottom = 91.0
+layout_mode = 1
+anchors_preset = -1
+offset_left = 890.0
+offset_top = 281.0
+offset_right = 1147.0
+offset_bottom = 364.0
 metadata/_edit_use_anchors_ = true
 
 [node name="BattleLog" type="RichTextLabel" parent="UI_Layout" unique_id=830665442]
@@ -94,7 +94,7 @@ unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = -1
 anchor_top = 0.53125
-anchor_right = 0.37586805
+anchor_right = 0.6918403
 anchor_bottom = 0.8075
 grow_horizontal = 2
 grow_vertical = 2
@@ -106,52 +106,45 @@ metadata/_edit_use_anchors_ = true
 [node name="BattleStage" parent="." unique_id=1463015289 instance=ExtResource("3_epypp")]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(600, 300)
-offset_left = 271.0
-offset_top = 107.0
-offset_right = 871.0
-offset_bottom = 407.0
+offset_left = 236.0
+offset_top = 125.0
+offset_right = 836.0
+offset_bottom = 425.0
 metadata/_edit_use_anchors_ = true
 
 [node name="AttributeSelect" type="OptionButton" parent="." unique_id=225071719]
 unique_name_in_owner = true
-offset_left = 1048.0
-offset_top = 542.0
-offset_right = 1088.0
-offset_bottom = 562.0
+offset_left = 1061.0
+offset_top = 451.0
+offset_right = 1101.0
+offset_bottom = 471.0
 metadata/_edit_use_anchors_ = true
 
 [node name="BuffSelect" type="OptionButton" parent="." unique_id=964330792]
 unique_name_in_owner = true
-offset_left = 897.0
-offset_top = 545.0
-offset_right = 937.0
-offset_bottom = 565.0
+offset_left = 951.0
+offset_top = 450.0
+offset_right = 991.0
+offset_bottom = 470.0
 metadata/_edit_use_anchors_ = true
 
-[node name="P1Min" type="SpinBox" parent="." unique_id=368037235]
-offset_left = 444.0
-offset_top = 543.0
-offset_right = 530.5
-offset_bottom = 574.0
+[node name="Slash" type="SpinBox" parent="." unique_id=368037235]
+offset_left = 819.0
+offset_top = 580.0
+offset_right = 905.5
+offset_bottom = 611.0
 metadata/_edit_use_anchors_ = true
 
-[node name="P1Max" type="SpinBox" parent="." unique_id=1102690282]
-offset_left = 567.0
-offset_top = 543.0
-offset_right = 653.5
-offset_bottom = 574.0
+[node name="Pierce" type="SpinBox" parent="." unique_id=1102690282]
+offset_left = 817.0
+offset_top = 537.0
+offset_right = 903.5
+offset_bottom = 568.0
 metadata/_edit_use_anchors_ = true
 
-[node name="P2Min" type="SpinBox" parent="." unique_id=600812988]
-offset_left = 679.0
-offset_top = 540.0
-offset_right = 765.5
-offset_bottom = 571.0
-metadata/_edit_use_anchors_ = true
-
-[node name="P2Max" type="SpinBox" parent="." unique_id=759227112]
-offset_left = 786.0
-offset_top = 538.0
-offset_right = 872.5
-offset_bottom = 569.0
+[node name="Strike" type="SpinBox" parent="." unique_id=600812988]
+offset_left = 818.0
+offset_top = 495.0
+offset_right = 904.5
+offset_bottom = 526.0
 metadata/_edit_use_anchors_ = true

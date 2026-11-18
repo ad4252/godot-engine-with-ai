@@ -36,10 +36,8 @@ class Skill extends RefCounted:
 
 
 # ── 설정 상수 ──
-const DICE_VALUE_MIN := 1
-const DICE_VALUE_MAX := 20
+const MAX_TOTAL_POINTS := 3  # 부여되는 총 내성 포인트
 
-# 🛠️ 속성과 버프 정의
 const ATTRIBUTES := {
 	"참격": "⚔️",
 	"타격": "🔨",
@@ -59,8 +57,8 @@ var enemy_hp_label: Label
 var battle_button: Button
 var reset_button: Button
 var result_log: RichTextLabel
-var attribute_display: Label        # 🛠️ 선택된 속성 표시
-var buff_display: Label             # 🛠️ 적용된 버프 표시
+var attribute_display: Label
+var buff_display: Label
 var attribute_select: OptionButton
 var buff_select: OptionButton
 
@@ -75,15 +73,11 @@ var enemy_skill: Skill
 var enemy_weakness: String = "참격"
 var enemy_resistance: String = "관통"
 
-# ── 주사위 UI 참조 ──
-var dice_min_boxes: Array[SpinBox] = []
-var dice_max_boxes: Array[SpinBox] = []
-
 
 func _ready() -> void:
 	_rng.randomize()
 	
-	# 모든 노드를 안전하게 찾기
+	# 모든 노드 참조 안전하게 가져오기
 	battle_stage = get_node_or_null("%BattleStage")
 	player_hp_label = get_node_or_null("%PlayerHPLabel") as Label
 	enemy_hp_label = get_node_or_null("%EnemyHPLabel") as Label
@@ -97,8 +91,6 @@ func _ready() -> void:
 
 	if result_log != null:
 		result_log.scroll_following = true
-	else:
-		push_warning("BattleLog 노드를 찾을 수 없습니다.")
 
 	# 스킬 초기화
 	player_skill = Skill.new("연속 베기", [[3, 7], [2, 6]])
@@ -108,25 +100,89 @@ func _ready() -> void:
 	if attribute_select != null and buff_select != null:
 		_setup_select_ui()
 
-	_setup_dice_ui()
-
 	# 버튼 시그널 연결
 	if battle_button != null:
 		battle_button.pressed.connect(_on_battle_pressed)
 	if reset_button != null:
 		reset_button.pressed.connect(_on_reset_pressed)
 	
-	# 속성/버프 선택 변경 시 즉시 표시 업데이트
 	if attribute_select != null:
 		attribute_select.item_selected.connect(_on_attribute_changed)
 	if buff_select != null:
 		buff_select.item_selected.connect(_on_buff_changed)
+	
+	# 🛠️ 내성 SpinBox 자동 감지 및 설정 (개별 0~2 제한 & 총합 3점 제한)
+	_setup_resistance_spinboxes()
 
 	_refresh_status()
 	_update_displays()
+	_update_resistance_display()
 	
 	if result_log != null:
 		result_log.text = "진행 버튼을 눌러 전투를 시작하세요!\n"
+
+
+# ───────── 🛠️ SpinBox 자동 검색 및 포인트 제어 ─────────
+
+# 씬 트리를 탐색하여 모든 SpinBox 노드를 순서대로 찾아내는 함수
+func _find_all_spinboxes(node: Node) -> Array[SpinBox]:
+	var result: Array[SpinBox] = []
+	if node is SpinBox:
+		result.append(node as SpinBox)
+	for child in node.get_children():
+		result.append_array(_find_all_spinboxes(child))
+	return result
+
+
+# 내성용 SpinBox 3개 가져오기
+func _get_res_boxes() -> Array[SpinBox]:
+	var boxes: Array[SpinBox] = []
+	var b1 = get_node_or_null("%P1Min") as SpinBox
+	var b2 = get_node_or_null("%P2Min") as SpinBox
+	var b3 = get_node_or_null("%P2Max") as SpinBox
+	
+	if b1 != null and b2 != null and b3 != null:
+		boxes = [b1, b2, b3]
+	else:
+		# unique name 접근에 실패했을 경우 씬 내부의 모든 SpinBox 자동 탐색
+		var all_boxes = _find_all_spinboxes(self)
+		if all_boxes.size() >= 3:
+			boxes = [all_boxes[0], all_boxes[1], all_boxes[2]]
+		else:
+			boxes = all_boxes
+			
+	return boxes
+
+
+func _setup_resistance_spinboxes() -> void:
+	var boxes = _get_res_boxes()
+	for box in boxes:
+		box.min_value = 0
+		box.max_value = 2
+		box.step = 1
+		box.rounded = true
+		box.value = 1  # 기본값: 각각 1포인트 (합 = 3)
+		
+		if box.value_changed.is_connected(_on_resistance_changed):
+			box.value_changed.disconnect(_on_resistance_changed)
+		box.value_changed.connect(_on_resistance_changed.bind(box))
+
+
+# SpinBox 조절 시 총 3포인트 초과 방지
+func _on_resistance_changed(_new_val: float, changed_box: SpinBox) -> void:
+	var boxes = _get_res_boxes()
+	var total = 0
+	for b in boxes:
+		total += int(b.value)
+	
+	# 포인트 합이 3을 초과하면 넘어간 만큼 방금 변경한 SpinBox 값을 깎음
+	if total > MAX_TOTAL_POINTS:
+		var excess = total - MAX_TOTAL_POINTS
+		var allowed = int(changed_box.value) - excess
+		changed_box.set_value_no_signal(clampi(allowed, 0, 2))
+	
+	_update_displays()
+	_update_resistance_display()
 
 
 # ───────── UI 초기화 ─────────
@@ -135,18 +191,17 @@ func _setup_select_ui() -> void:
 	if attribute_select == null or buff_select == null:
 		return
 
-	# 속성 설정
+	attribute_select.clear()
 	for attr_name in ATTRIBUTES.keys():
 		attribute_select.add_item(attr_name)
 	attribute_select.selected = 0
 
-	# 버프 설정
+	buff_select.clear()
 	for buff_name in BUFFS.keys():
 		buff_select.add_item(buff_name)
 	buff_select.selected = 0
 
 
-# 🛠️ 속성/버프 선택 변경 시 호출
 func _on_attribute_changed(_index: int) -> void:
 	_update_displays()
 
@@ -155,7 +210,6 @@ func _on_buff_changed(_index: int) -> void:
 	_update_displays()
 
 
-# 🛠️ 선택된 속성과 버프를 화면에 표시
 func _update_displays() -> void:
 	if attribute_display == null or buff_display == null:
 		return
@@ -176,63 +230,9 @@ func _update_displays() -> void:
 	buff_display.text = "%s %s" % [buff_icon, buff_name]
 
 
-# ───────── 주사위 커스텀 UI ─────────
-
-func _setup_dice_ui() -> void:
-	dice_min_boxes = [
-		get_node_or_null("%P1Min") as SpinBox,
-		get_node_or_null("%P2Min") as SpinBox
-	]
-	dice_max_boxes = [
-		get_node_or_null("%P1Max") as SpinBox,
-		get_node_or_null("%P2Max") as SpinBox
-	]
-
-	for i in player_skill.dice_list.size():
-		var d = player_skill.dice_list[i]
-		var min_box: SpinBox = dice_min_boxes[i]
-		var max_box: SpinBox = dice_max_boxes[i]
-
-		if min_box == null or max_box == null:
-			continue
-
-		for box in [min_box, max_box]:
-			box.min_value = DICE_VALUE_MIN
-			box.max_value = DICE_VALUE_MAX
-			box.step = 1
-			box.rounded = true
-
-		min_box.set_value_no_signal(d.min_p)
-		max_box.set_value_no_signal(d.max_p)
-
-		min_box.value_changed.connect(_on_dice_changed.bind(i, true))
-		max_box.value_changed.connect(_on_dice_changed.bind(i, false))
-
-
-func _on_dice_changed(_value: float, index: int, is_min: bool) -> void:
-	var dice = player_skill.dice_list[index]
-	var min_box: SpinBox = dice_min_boxes[index]
-	var max_box: SpinBox = dice_max_boxes[index]
-
-	var new_min := int(min_box.value)
-	var new_max := int(max_box.value)
-
-	if new_min > new_max:
-		if is_min:
-			new_max = new_min
-		else:
-			new_min = new_max
-
-	dice.min_p = new_min
-	dice.max_p = new_max
-	min_box.set_value_no_signal(new_min)
-	max_box.set_value_no_signal(new_max)
-
-
 func _set_dice_ui_editable(value: bool) -> void:
-	for box in dice_min_boxes + dice_max_boxes:
-		if box != null:
-			box.editable = value
+	for box in _get_res_boxes():
+		box.editable = value
 
 
 # ───────── 전투 실행 ─────────
@@ -261,7 +261,7 @@ func _execute_battle() -> void:
 	var dice_bonus: int = 0
 	var extra_damage: int = 0
 	var buff_display_text: String = ""
-
+	
 	if buff_select != null:
 		var buff_name = buff_select.get_item_text(buff_select.selected)
 		if buff_name == "주사위+1":
@@ -305,8 +305,21 @@ func _execute_battle() -> void:
 
 	elif e_total > p_total:
 		winner = 1
-		final_damage = base_damage
-		player_hp = maxi(0, player_hp - final_damage)
+		base_damage += extra_damage
+	
+		# 🛠️ 플레이어의 내성 배수 계산
+		var resistance_multiplier = _get_resistance_multiplier(selected_attr_name)
+		var final_enemy_damage = int(base_damage * resistance_multiplier)
+	
+		if resistance_multiplier == 2.0:
+			attr_msg = " [⚠️ %s 취약 2배]" % selected_attr_name
+		elif resistance_multiplier == 0.2:
+			attr_msg = " [🛡️ %s 내성 20%%]" % selected_attr_name
+		else:
+			attr_msg = " [⚪ %s 보통]" % selected_attr_name
+	
+		final_damage = final_enemy_damage
+		player_hp = maxi(0, player_hp - final_enemy_damage)
 
 	# 결과 기록
 	_log_battle_result(
@@ -366,8 +379,8 @@ func _log_battle_result(
 		)
 	elif winner == 1:
 		result_log.append_text(
-			"[❌ 패배] (%s vs %s) → 내 HP %d 감소\n"
-			% [p_roll_str, e_roll_str, damage]
+			"[❌ 패배] (%s vs %s)%s → 내 HP %d 감소\n"
+			% [p_roll_str, e_roll_str, attr_msg, damage]
 		)
 	else:
 		result_log.append_text(
@@ -393,6 +406,8 @@ func _on_reset_pressed() -> void:
 	if buff_select != null:
 		buff_select.disabled = false
 		buff_select.selected = 0
+	
+	_setup_resistance_spinboxes()
 	_update_displays()
 	_refresh_status()
 
@@ -402,3 +417,58 @@ func _refresh_status() -> void:
 		player_hp_label.text = "플레이어 HP: %d / 100" % player_hp
 	if enemy_hp_label != null:
 		enemy_hp_label.text = "적 HP: %d / 100" % enemy_hp
+
+
+# 🛠️ 속성별 내성 레벨 반환 (위에서부터 순서대로 참격=0번, 관통=1번, 타격=2번)
+func _get_resistance_level(attribute: String) -> int:
+	var boxes = _get_res_boxes()
+	if boxes.size() < 3:
+		return 1  # SpinBox가 모자라면 기본 보통(1)
+	
+	match attribute:
+		"참격":
+			return int(boxes[0].value)
+		"관통":
+			return int(boxes[1].value)
+		"타격":
+			return int(boxes[2].value)
+	return 1
+
+
+# 🛠️ 내성 배수 계산 (0: 취약 2.0배, 1: 보통 1.0배, 2: 내성 0.2배)
+func _get_resistance_multiplier(attribute: String) -> float:
+	var level = _get_resistance_level(attribute)
+	match level:
+		0:
+			return 2.0   # 취약 (피해 2배)
+		1:
+			return 1.0   # 보통 (피해 1배)
+		2:
+			return 0.2   # 내성 (피해 0.2배)
+	return 1.0
+
+
+func _get_resistance_text(attribute: String) -> String:
+	var level = _get_resistance_level(attribute)
+	match level:
+		0:
+			return "⚠️ 취약 (2배)"
+		1:
+			return "⚪ 보통"
+		2:
+			return "🛡️ 내성 (20%)"
+	return "⚪ 보통"
+
+
+func _update_resistance_display() -> void:
+	var boxes = _get_res_boxes()
+	var total_used = 0
+	for b in boxes:
+		total_used += int(b.value)
+		
+	var text = "사용 포인트: %d / %d\n" % [total_used, MAX_TOTAL_POINTS]
+	text += "⚔️ 참격: %s\n" % _get_resistance_text("참격")
+	text += "🗡️ 관통: %s\n" % _get_resistance_text("관통")
+	text += "🔨 타격: %s" % _get_resistance_text("타격")
+	
+	print(text)
