@@ -1,0 +1,28 @@
+[gd_scene format=3 uid="uid://dx58jv4gce3tq"]
+
+[ext_resource type="Script" uid="uid://gji14u05rkew" path="res://battle_stage.gd" id="1_02wme"]
+
+[node name="BattleStage" type="Control" unique_id=1463015289]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_02wme")
+
+[node name="World" type="Node2D" parent="." unique_id=374902360]
+
+[node name="PlayerSprite" type="AnimatedSprite2D" parent="World" unique_id=1098160215]
+
+[node name="EnemySprite" type="AnimatedSprite2D" parent="World" unique_id=1775721605]
+
+[node name="PlayerRoll" type="Label" parent="World" unique_id=338335414]
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="EnemyRoll" type="Label" parent="World" unique_id=1804139557]
+offset_left = 293.0
+offset_top = 145.0
+offset_right = 641.0
+offset_bottom = 243.0
